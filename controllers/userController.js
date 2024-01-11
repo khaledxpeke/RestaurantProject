@@ -91,7 +91,7 @@ exports.login = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find({role:"restaurateur"});
+    const users = await User.find({role:"restaurateur",isApproved:true});
     if (!users) {
       return res.status(404).json({ message: "Aucun utilisateurs trouvée" });
     }
