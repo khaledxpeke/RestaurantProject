@@ -104,6 +104,21 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+exports.getNonAcceptedRestaurateur = async (req, res) => {
+  try {
+    const users = await User.find({role:"restaurateur",isApproved:false});
+    if (!users) {
+      return res.status(404).json({ message: "Aucun utilisateurs non acceptée trouvée" });
+    }
+    res.status(200).json(users);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      message: "utilisateurs introuvables",
+    });
+  }
+};
+
 exports.processUser = async (req, res) => {
     const { userId } = req.params;
     const { action } = req.body; 
