@@ -7,7 +7,7 @@ app.use(express.json());
 
 exports.createRestaurant = async (req, res) => {
     const userId = req.user.user._id;
-  const { name, phone, address, user } = req.body;
+  const { name, phone, address } = req.body;
   try {
     const restaurant = new Restaurant({
       name,
@@ -18,7 +18,7 @@ exports.createRestaurant = async (req, res) => {
     await restaurant.save();
     res
       .status(201)
-      .json({ Restaurant, message: "Restaurant créé avec succès" });
+      .json({ restaurant, message: "Restaurant créé avec succès" });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
