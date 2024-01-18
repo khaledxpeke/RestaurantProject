@@ -51,3 +51,13 @@ exports.createPlat = async (req, res) => {
     }
   });
 };
+
+exports.getPlats = async (req, res) => {
+  const { restaurantId } = req.params;
+  try {
+    const plats = await Plat.find({ restaurant: restaurantId });
+    res.status(200).json(plats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

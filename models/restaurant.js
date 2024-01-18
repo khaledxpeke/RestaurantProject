@@ -12,6 +12,10 @@ const RestaurantSchema = new Mongoose.Schema({
   address: {
     type: String,
   },
+  image: {
+    type: String,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
