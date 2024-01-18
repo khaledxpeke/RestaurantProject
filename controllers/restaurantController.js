@@ -4,24 +4,47 @@ const app = express();
 const User = require("../models/user");
 require("dotenv").config();
 app.use(express.json());
+const multer = require("multer");
+const multerStorage = require("../middleware/multerStorage");
+const upload = multer({ storage: multerStorage });
+const fs = require("fs");
 
 exports.createRestaurant = async (req, res) => {
+  upload.single("image")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({
+        message: "Image upload failed",
+        error: err.message,
+      });
+    }
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Ajouter une image",
+        error: "Please upload an image",
+      });
+    }
     const userId = req.user.user._id;
-  const { name, phone, address } = req.body;
-  try {
-    const restaurant = new Restaurant({
-      name,
-      phone,
-      address,
-      user:userId,
-    });
-    await restaurant.save();
-    res
-      .status(201)
-      .json({ restaurant, message: "Restaurant créé avec succès" });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+    const { name, phone, address } = req.body;
+    const image = req.file.path;
+    try {
+      const restaurant = new Restaurant({
+        name,
+        phone,
+        address,
+        user: userId,
+      });
+      if (image) {
+        restaurant.image = image;
+        await restaurant.save();
+      }
+      await restaurant.save();
+      res
+        .status(201)
+        .json({ restaurant, message: "Restaurant créé avec succès" });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  });
 };
 exports.getRestaurants = async (req, res) => {
   const userId = req.user.user._id;
