@@ -27,7 +27,7 @@ exports.getRestaurants = async (req, res) => {
   const userId = req.user.user._id;
   const userRole = req.user.user.role;
   try {
-    if (userRole === "restaurant") {
+    if (userRole === "restaurateur") {
       const restaurants = await Restaurant.find({ user: userId }).populate(
         "user"
       );
@@ -36,6 +36,15 @@ exports.getRestaurants = async (req, res) => {
       const restaurants = await Restaurant.find({});
       res.status(200).json(restaurants);
     }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getAllRestaurants = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.find({});
+    res.status(200).json(restaurants);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
