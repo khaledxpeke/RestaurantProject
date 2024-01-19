@@ -1,7 +1,6 @@
 const Restaurant = require("../models/restaurant");
 const express = require("express");
 const app = express();
-const User = require("../models/user");
 require("dotenv").config();
 app.use(express.json());
 const multer = require("multer");
