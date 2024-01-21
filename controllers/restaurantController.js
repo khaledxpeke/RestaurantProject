@@ -54,7 +54,7 @@ exports.getRestaurants = async (req, res) => {
        restaurants = await Restaurant.find({ user: userId }).populate(
         "user"
       );
-      res.status(200).json(restaurants).populate("user");
+      res.status(200).json(restaurants);
     } else {
       restaurants = await Restaurant.find({});
       res.status(200).json(restaurants);
