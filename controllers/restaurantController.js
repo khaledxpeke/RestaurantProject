@@ -39,7 +39,7 @@ exports.createRestaurant = async (req, res) => {
       await restaurant.save();
       res
         .status(201)
-        .json({ restaurant, message: "Restaurant créé avec succès" });
+        .json( restaurant);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -53,7 +53,7 @@ exports.getRestaurants = async (req, res) => {
       const restaurants = await Restaurant.find({ user: userId }).populate(
         "user"
       );
-      res.status(200).json(restaurants);
+      res.status(200).json(restaurants).populate("user");
     } else {
       const restaurants = await Restaurant.find({});
       res.status(200).json(restaurants);
