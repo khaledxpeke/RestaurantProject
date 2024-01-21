@@ -49,13 +49,14 @@ exports.getRestaurants = async (req, res) => {
   const userId = req.user.user._id;
   const userRole = req.user.user.role;
   try {
+    let restaurants
     if (userRole === "restaurateur") {
-      const restaurants = await Restaurant.find({ user: userId }).populate(
+       restaurants = await Restaurant.find({ user: userId }).populate(
         "user"
       );
       res.status(200).json(restaurants).populate("user");
     } else {
-      const restaurants = await Restaurant.find({});
+      restaurants = await Restaurant.find({});
       res.status(200).json(restaurants);
     }
   } catch (err) {
