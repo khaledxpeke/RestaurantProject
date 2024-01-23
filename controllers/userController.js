@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ message: "L'utilisateur existe déjà" });
+      return res.status(400).json({ message: "Restaurateur existe déjà" });
     }
 
     const newUser = new User({
@@ -47,6 +47,47 @@ exports.register = async (req, res) => {
     });
   }
 };
+
+exports.registerClient = async (req, res) => {
+  const { email, firstName, lastName, phone,address,password} = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ message: "L'utilisateur existe déjà" });
+    }
+
+    const newUser = new User({
+      email,
+      role: "client",
+      firstName,
+      lastName,
+      phone,
+      address,
+      password: await bcrypt.hash(password, await bcrypt.genSalt(10)),
+    });
+
+    await newUser.save();
+
+    const payload = {
+      user: {
+        id: newUser._id,
+        role: newUser.role,
+      },
+    };
+
+    jwt.sign(payload, jwtSecret, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      res.cookie("jwt", token, { httpOnly: true, maxAge: 360000 });
+      res.json({ token, newUser,message:"client ajouté avec succées" });
+    });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      message: "Erreur du serveur",
+    });
+  }
+};
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;

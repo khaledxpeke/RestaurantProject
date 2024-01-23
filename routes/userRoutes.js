@@ -4,11 +4,13 @@ const {
   login,
   getUsers,
   processUser,
-  getNonAcceptedRestaurateur
+  getNonAcceptedRestaurateur,
+  registerClient
 } = require("../controllers/userController");
 const  {roleAuth}  = require("../middleware/auth");
 
 router.post("/register",register);
+router.post("/registerClient",roleAuth(["client"]),registerClient);
 router.post("/login",login);
 router.put("/processUser/:userId", roleAuth(["admin"]), processUser);
 router.get("/", roleAuth(["admin"]), getUsers);
