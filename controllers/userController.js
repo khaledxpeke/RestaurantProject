@@ -78,7 +78,7 @@ exports.registerClient = async (req, res) => {
     jwt.sign(payload, jwtSecret, { expiresIn: 360000 }, (err, token) => {
       if (err) throw err;
       res.cookie("jwt", token, { httpOnly: true, maxAge: 360000 });
-      res.json({ token, newUser,message:"client ajouté avec succées" });
+      res.status(201).json({ token, newUser,message:"client ajouté avec succées" });
     });
   } catch (err) {
     console.log(err.message);
@@ -119,7 +119,7 @@ exports.login = async (req, res) => {
       (err, token) => {
         if (err) throw err;
         res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-        res.status(201).json({ token });
+        res.status(200).json({ token });
       }
     );
   } catch (err) {
