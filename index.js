@@ -22,4 +22,5 @@ server = app.listen(3300, function () {
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/restaurant", require("./routes/restaurantRoutes"));
 app.use("/api/plat", require("./routes/platRoutes"));
+app.use("/api/reservation", require("./routes/reservationRoutes"));
 app.use("/api/uploads", express.static("uploads"));
