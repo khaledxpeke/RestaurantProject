@@ -31,7 +31,7 @@ exports.createReservation = async (req, res) => {
       restaurant: restaurantId,
     });
     await reservation.save();
-   
+
     res
       .status(201)
       .json({ reservation, message: "reservation ajouté avec succées" });
@@ -49,12 +49,14 @@ exports.getReservations = async (req, res) => {
         restaurant: restaurantId,
       }).populate("user");
       res.status(200).json(reservations);
-    }
-    else if (userRole === "client") {
+    } else if (userRole === "client") {
       const userId = req.user.user._id;
-      const reservations = await Reservation.find({ user: userId,restaurant: restaurantId }).populate(
-        "restaurant"
-      );
+      const reservations = await Reservation.find({
+        user: userId,
+        restaurant: restaurantId,
+      })
+        .populate("restaurant")
+        .sort({ createdAt: -1 });
       res.status(200).json(reservations);
     }
   } catch (err) {
@@ -72,10 +74,10 @@ exports.processReservation = async (req, res) => {
     if (!reservation) {
       return res.status(404).json({ message: "Aucun réservation trouvée" });
     }
-    const allowedStatus = ["acceptée", "refusée","en cours"];
+    const allowedStatus = ["acceptée", "refusée", "en cours"];
     if (!allowedStatus.includes(status)) {
-        return res.status(400).json({ message: "Status invalide" });
-        }
+      return res.status(400).json({ message: "Status invalide" });
+    }
     reservation.status = status;
     await reservation.save();
     if (status === "acceptée") {

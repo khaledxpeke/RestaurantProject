@@ -39,6 +39,10 @@ const ReservationSchema = new Mongoose.Schema({
     ref: "Restaurant",
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Reservation = Mongoose.model("Reservation", ReservationSchema);
