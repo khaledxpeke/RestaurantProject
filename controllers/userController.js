@@ -88,47 +88,51 @@ exports.registerClient = async (req, res) => {
   }
 };
 
-
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    let user = await User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      res.status(401).json({
+        message: "Aucun utilisateur trouvée",
+        error: "Aucun utilisateur trouvée",
+      });
+    } else {
+      bcrypt.compare(password, user.password).then(function (result) {
+        if (result) {
+          if (user.role === "restaurateur" && !user.isApproved) {
+            return res.status(403).json({ message: "Account not approved" });
+          }
+          const maxAgeInSeconds = 8 * 60 * 60 * 24 * 365; // 1 year in sec
+          const maxAgeInMilliseconds = maxAgeInSeconds * 1000; 
+          const tokenPayload = {
+            user: user
+          };
+          const token = jwt.sign(tokenPayload, jwtSecret, {
+            expiresIn: maxAgeInSeconds, // 3hrs in sec
+          });
+          res.cookie("jwt", token, {
+            httpOnly: true,
+            maxAge: maxAgeInMilliseconds * 1000, // 3hrs in ms
+          });
+          res.status(201).json({
+            token: token,
+          });
+        } else {
+          res
+            .status(400)
+            .json({ message: "les informations d'identification invalides!" });
+        }
+      });
     }
-
-    // Check if the provided password matches the stored password
-    const isPasswordMatch = bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      return res.status(401).json({ message: "les informations d'identification invalides" });
-    }
-
-    if (user.role === "restaurateur" && !user.isApproved) {
-        return res.status(403).json({ message: "Account not approved" });
-      }
-    const maxAge = 8 * 60 * 60;
-    const payload = {
-      user: user,
-      role: user.role,
-    };
-    console.log(payload);
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: maxAge },
-      (err, token) => {
-        if (err) throw err;
-        res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-        res.status(200).json({ token });
-      }
-    );
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).json({
-      message: "Erreur du serveur",
+  } catch (error) {
+    res.status(400).json({
+      message: "An error occurred",
+      error: error.message,
     });
   }
 };
+
 
 exports.getUsers = async (req, res) => {
   try {
