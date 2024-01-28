@@ -7,168 +7,132 @@ require("dotenv").config();
 const jwtSecret = process.env.JWT_SECRET;
 app.use(express.json());
 
-
 exports.register = async (req, res) => {
-  const { email, firstName, lastName, phone, password,restaurantName, address } = req.body;
+  const { email, firstName, lastName, phone,restaurantName,address } = req.body;
   try {
     const user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ message: "L'utilisateur existe déjà" });
+      return res.status(400).json({ message: "Restaurateur existe déjà" });
     }
 
-    bcrypt.hash(password, 10).then(async (hash) => {
-      await User.create({
-        email,
-        role: "restaurateur",
-        firstName,
-        lastName,
-        phone,
-        address,
-        restaurantName,
-        password: hash,
-      })
-        .then((user) => {
-          const maxAge = 8 * 60 * 60;
-
-          const payload = {
-            user: {
-              id: user._id,
-              role: user.role,
-            },
-          };
-          const token = jwt.sign(payload, jwtSecret, {
-            expiresIn: maxAge, 
-          });
-          res.cookie("jwt", token, {
-            httpOnly: true,
-            maxAge: maxAge * 1000, 
-          });
-          res.status(201).json({
-            user: user,
-            token: token,
-            message: "Votre compte a été créé avec succès",
-          });
-        })
-        .catch((error) =>
-          res.status(400).json({
-            message: "This name already exists",
-            error: error.message,
-          })
-        );
+    const newUser = new User({
+      email,
+      role: "restaurateur",
+      firstName,
+      lastName,
+      phone,
+      restaurantName,
+      address,
+      password: await bcrypt.hash(phone, await bcrypt.genSalt(10)),
     });
-  } catch (error) {
-    res.status(400).json({
-      message: "An error occurred",
-      error: error.message,
+
+    await newUser.save();
+
+    const payload = {
+      user: {
+        id: newUser._id,
+        role: newUser.role,
+      },
+    };
+
+    jwt.sign(payload, jwtSecret, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      res.cookie("jwt", token, { httpOnly: true, maxAge: 360000 });
+      res.json({ token, newUser,message:"restaurateur ajouté avec succées" });
+    });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      message: "Erreur du serveur",
     });
   }
 };
 
 exports.registerClient = async (req, res) => {
-  const { email, firstName, lastName, phone, password, address } = req.body;
+  const { email, firstName, lastName, phone,address,password} = req.body;
   try {
     const user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: "L'utilisateur existe déjà" });
     }
 
-    bcrypt.hash(password, 10).then(async (hash) => {
-      await User.create({
-        email,
-        role: "client",
-        firstName,
-        lastName,
-        phone,
-        address,
-        password: hash,
-      })
-        .then((user) => {
-          const maxAge = 8 * 60 * 60;
-
-          const payload = {
-            user: {
-              id: user._id,
-              role: user.role,
-            },
-          };
-          const token = jwt.sign(payload, jwtSecret, {
-            expiresIn: maxAge, 
-          });
-          res.cookie("jwt", token, {
-            httpOnly: true,
-            maxAge: maxAge * 1000, 
-          });
-          res.status(201).json({
-            user: user,
-            token: token,
-            message: "Votre compte a été créé avec succès",
-          });
-        })
-        .catch((error) =>
-          res.status(400).json({
-            message: "This name already exists",
-            error: error.message,
-          })
-        );
+    const newUser = new User({
+      email,
+      role: "client",
+      firstName,
+      lastName,
+      phone,
+      address,
+      password: await bcrypt.hash(password, await bcrypt.genSalt(10)),
     });
-  } catch (error) {
-    res.status(400).json({
-      message: "An error occurred",
-      error: error.message,
+
+    await newUser.save();
+
+    const payload = {
+      user: {
+        id: newUser._id,
+        role: newUser.role,
+      },
+    };
+
+    jwt.sign(payload, jwtSecret, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      res.cookie("jwt", token, { httpOnly: true, maxAge: 360000 });
+      res.status(201).json({ token, newUser,message:"client ajouté avec succées" });
+    });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      message: "Erreur du serveur",
     });
   }
 };
 
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
-
+    let user = await User.findOne({ email });
     if (!user) {
-      res.status(401).json({
-        message: "Aucun utilisateur trouvée",
-        error: "Aucun utilisateur trouvée",
-      });
-    } else {
-      // if (user.role === "restaurateur" && !user.isApproved) {
-      //   return res.status(403).json({ message: "Account not approved" });
-      // }
-      bcrypt.compare(password, user.password).then(function (result) {
-        console.log(result)
-        if (result) {
-          const maxAgeInSeconds = 8 * 60 * 60 * 24 * 365;
-          const maxAgeInMilliseconds = maxAgeInSeconds * 1000;
-          const tokenPayload = {
-            user: user,
-          };
-          const token = jwt.sign(tokenPayload, jwtSecret, {
-            expiresIn: maxAgeInSeconds, // 3hrs in sec
-          });
-          res.cookie("jwt", token, {
-            httpOnly: true,
-            maxAge: maxAgeInMilliseconds * 1000, // 3hrs in ms
-          });
-          res.status(200).json({
-            token: token,
-          });
-        } else {
-          res
-            .status(400)
-            .json({ message: "les informations d'identification invalides!" });
-        }
-      });
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
-  } catch (error) {
-    res.status(400).json({
-      message: "An error occurred",
-      error: error.message,
+
+    // Check if the provided password matches the stored password
+    const isPasswordMatch = bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ message: "les informations d'identification invalides" });
+    }
+
+    if (user.role === "restaurateur" && !user.isApproved) {
+        return res.status(403).json({ message: "Account not approved" });
+      }
+    const maxAge = 8 * 60 * 60;
+    const payload = {
+      user: user,
+      role: user.role,
+    };
+    console.log(payload);
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: maxAge },
+      (err, token) => {
+        if (err) throw err;
+        res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+        res.status(200).json({ token });
+      }
+    );
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({
+      message: "Erreur du serveur",
     });
   }
 };
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: "restaurateur", isApproved: true });
+    const users = await User.find({role:"restaurateur",isApproved:true});
     if (!users) {
       return res.status(404).json({ message: "Aucun utilisateurs trouvée" });
     }
@@ -183,11 +147,9 @@ exports.getUsers = async (req, res) => {
 
 exports.getNonAcceptedRestaurateur = async (req, res) => {
   try {
-    const users = await User.find({ role: "restaurateur", isApproved: false });
+    const users = await User.find({role:"restaurateur",isApproved:false});
     if (!users) {
-      return res
-        .status(404)
-        .json({ message: "Aucun utilisateurs non acceptée trouvée" });
+      return res.status(404).json({ message: "Aucun utilisateurs non acceptée trouvée" });
     }
     res.status(200).json(users);
   } catch (err) {
@@ -199,30 +161,28 @@ exports.getNonAcceptedRestaurateur = async (req, res) => {
 };
 
 exports.processUser = async (req, res) => {
-  const { userId } = req.params;
-  const { action } = req.body;
-
-  try {
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    const { userId } = req.params;
+    const { action } = req.body; 
+  
+    try {
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      if (action === "accept") {
+        user.isApproved = true;
+        await user.save();
+        return res.status(200).json({ message: "User accepted successfully" });
+      } else if (action === "decline") {
+        await User.findByIdAndDelete(userId);
+        return res.status(200).json({ message: "User refused and deleted successfully" });
+      } else {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).json({ message: "Internal server error" });
     }
-
-    if (action === "accept") {
-      user.isApproved = true;
-      await user.save();
-      return res.status(200).json({ message: "User accepted successfully" });
-    } else if (action === "decline") {
-      await User.findByIdAndDelete(userId);
-      return res
-        .status(200)
-        .json({ message: "User refused and deleted successfully" });
-    } else {
-      return res.status(400).json({ message: "Invalid action" });
-    }
-  } catch (err) {
-    console.log(err.message);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
+  };
