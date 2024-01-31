@@ -32,6 +32,7 @@ exports.register = async (req, res) => {
       user: {
         id: newUser._id,
         role: newUser.role,
+
       },
     };
 
