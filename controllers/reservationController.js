@@ -47,18 +47,28 @@ exports.getReservations = async (req, res) => {
     if (userRole === "restaurateur") {
       const reservations = await Reservation.find({
         restaurant: restaurantId,
-      }).populate("user");
-      res.status(200).json(reservations);
-    } else if (userRole === "client") {
-      const userId = req.user.user._id;
-      const reservations = await Reservation.find({
-        user: userId,
-        restaurant: restaurantId,
       })
+        .populate("user")
+        .sort({ createdAt: -1 });
+      res.status(200).json(reservations);
+    } else {
+      const reservations = await Reservation.find({})
         .populate("restaurant")
         .sort({ createdAt: -1 });
       res.status(200).json(reservations);
     }
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.getClientReservations = async (req, res) => {
+  const userId = req.user.user._id;
+  try {
+    const reservations = await Reservation.find({ user: userId })
+      .populate("restaurant").populate("user")
+      .sort({ createdAt: -1 });
+    res.status(200).json(reservations);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
