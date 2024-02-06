@@ -25,9 +25,6 @@ const UserSchema = new Mongoose.Schema({
   password: {
     type: String,
   },
-  restaurantName: {
-    type: String,
-  },
   address: {
     type: String,
   },
