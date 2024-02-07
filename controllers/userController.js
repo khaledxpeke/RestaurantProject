@@ -8,7 +8,7 @@ const jwtSecret = process.env.JWT_SECRET;
 app.use(express.json());
 
 exports.register = async (req, res) => {
-  const { email, firstName, lastName, phone,restaurantName,address } = req.body;
+  const { email, firstName, lastName, phone,address } = req.body;
   try {
     const user = await User.findOne({ email });
     if (user) {
@@ -21,7 +21,6 @@ exports.register = async (req, res) => {
       firstName,
       lastName,
       phone,
-      restaurantName,
       address,
       password: await bcrypt.hash(phone, await bcrypt.genSalt(10)),
     });
