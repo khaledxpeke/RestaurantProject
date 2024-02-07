@@ -68,7 +68,10 @@ exports.getReservations = async (req, res) => {
 exports.getClientReservations = async (req, res) => {
   const userId = req.user.user._id;
   try {
-    const reservations = await Reservation.find({ user: userId })
+    const reservations = await Reservation.find({
+      user: userId,
+      reservationDate: { $gte: new Date() },
+    })
       .populate("restaurant")
       .populate("user")
       .sort({ createdAt: -1 });
