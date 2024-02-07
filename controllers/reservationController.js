@@ -47,12 +47,15 @@ exports.getReservations = async (req, res) => {
     if (userRole === "restaurateur") {
       const reservations = await Reservation.find({
         restaurant: restaurantId,
+        reservationDate: { $gte: new Date() },
       })
         .populate("user")
         .sort({ createdAt: -1 });
       res.status(200).json(reservations);
     } else {
-      const reservations = await Reservation.find({})
+      const reservations = await Reservation.find({
+        reservationDate: { $gte: new Date() },
+      })
         .populate("restaurant")
         .sort({ createdAt: -1 });
       res.status(200).json(reservations);
@@ -66,7 +69,8 @@ exports.getClientReservations = async (req, res) => {
   const userId = req.user.user._id;
   try {
     const reservations = await Reservation.find({ user: userId })
-      .populate("restaurant").populate("user")
+      .populate("restaurant")
+      .populate("user")
       .sort({ createdAt: -1 });
     res.status(200).json(reservations);
   } catch (err) {

@@ -5,7 +5,7 @@ const ReservationSchema = new Mongoose.Schema({
     required: true,
   },
   reservationDate: {
-    type: String,
+    type: Date,
     required: true,
   },
   numpeople: {
