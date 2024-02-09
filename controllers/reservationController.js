@@ -21,7 +21,7 @@ exports.createReservation = async (req, res) => {
   try {
     const reservation = new Reservation({
       reservationTime,
-      // reservationDate,
+      reservationDate,
       numpeople,
       phone,
       email,
