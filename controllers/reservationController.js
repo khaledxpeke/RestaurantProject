@@ -44,11 +44,12 @@ exports.createReservation = async (req, res) => {
 exports.getReservations = async (req, res) => {
   const userRole = req.user.user.role;
   const { restaurantId } = req.params;
+  const currentDate = format(new Date(), "yyyy-MM-dd");
   try {
     if (userRole === "restaurateur") {
       const reservations = await Reservation.find({
         restaurant: restaurantId,
-        reservationDate: { $gte: new Date() },
+        reservationDate: { $gte: currentDate },
       })
         .populate("user")
         .sort({ createdAt: -1 });
