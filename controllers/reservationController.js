@@ -20,8 +20,8 @@ exports.createReservation = async (req, res) => {
   const { restaurantId } = req.params;
   try {
     const reservation = new Reservation({
-      reservationTime,
-      reservationDate,
+      // reservationTime,
+      // reservationDate,
       numpeople,
       phone,
       email,
