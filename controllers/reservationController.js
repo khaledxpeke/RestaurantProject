@@ -69,7 +69,7 @@ exports.getReservations = async (req, res) => {
 };
 
 exports.getClientReservations = async (req, res) => {
-  const userId = req.user.user._id;
+  const {userId} = req.params;
   const currentDate = format(new Date(), "yyyy-MM-dd");
   try {
     const reservations = await Reservation.find({

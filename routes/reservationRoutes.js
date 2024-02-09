@@ -9,7 +9,7 @@ const  {roleAuth}  = require("../middleware/auth");
 
 router.post("/:restaurantId/:userId",createReservation);
 router.get("/:restaurantId", roleAuth(["restaurateur","admin"]), getReservations);
-router.get("/", roleAuth(["client"]), getClientReservations);
+router.get("/:userId", getClientReservations);
 router.put("/:reservationId", roleAuth(["restaurateur"]), processReservation);
 
 
