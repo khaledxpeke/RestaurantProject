@@ -34,7 +34,7 @@ exports.createReservation = async (req, res) => {
 
     res
       .status(201)
-      .json({ reservation, message: "reservation ajouté avec succées" });
+      .json({ message: "reservation ajouté avec succées" });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
