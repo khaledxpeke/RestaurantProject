@@ -2,7 +2,7 @@ const Mongoose = require("mongoose");
 const ReservationSchema = new Mongoose.Schema({
   reservationTime: {
     type: String,
-    // required: true,
+    required: true,
   },
   reservationDate: {
     type: Date,
