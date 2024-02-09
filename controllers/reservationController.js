@@ -8,7 +8,7 @@ const transporter = require("../middleware/email");
 const User = require("../models/user");
 
 exports.createReservation = async (req, res) => {
-  const {userId} = req.params;
+  const userId = req.user.user._id;
   const {
     reservationTime,
     reservationDate,
