@@ -57,7 +57,7 @@ exports.getReservations = async (req, res) => {
       res.status(200).json(reservations);
     } else {
       const reservations = await Reservation.find({
-        reservationDate: { $gte: new Date() },
+        reservationDate: { $gte: currentDate },
       })
         .populate("restaurant")
         .sort({ createdAt: -1 });
@@ -70,10 +70,11 @@ exports.getReservations = async (req, res) => {
 
 exports.getClientReservations = async (req, res) => {
   const userId = req.user.user._id;
+  const currentDate = format(new Date(), "yyyy-MM-dd");
   try {
     const reservations = await Reservation.find({
       user: userId,
-      reservationDate: { $gte: new Date() },
+      reservationDate: { $gte: currentDate },
     })
       .populate("restaurant")
       .populate("user")
