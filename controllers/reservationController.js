@@ -13,17 +13,18 @@ exports.createReservation = async (req, res) => {
   const { userId } = req.params;
   const {
     reservationTime,
+    reservationDate,
     email,
     numpeople,
     phone,
     commentaire,
   } = req.body;
-  const currentDate = format(new Date(), "yyyy-MM-dd");
+  //const currentDate = format(new Date(), "yyyy-MM-dd");
   const { restaurantId } = req.params;
   try {
     const reservation = new Reservation({
       reservationTime,
-      reservationDate:currentDate,
+      reservationDate,
       numpeople,
       phone,
       email,
